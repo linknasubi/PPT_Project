@@ -3,6 +3,7 @@ import numpy as np
 import os
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
@@ -43,10 +44,25 @@ def sampleMaker(data: pd.DataFrame) -> int:
     for _ in range (1, data.shape[1]-1):
         
         std_aux_list = data[data.columns[_]].std()
+        
+        
         aux_list = (data[data.columns[_]] - std_aux_list/(2*std_aux_list))
+        
+#        aux_list = ((data[data.columns[_]] - data[data.columns[_]].max())/(data[data.columns[_]].max() - data[data.columns[_]].min()))
+        
+        mu, std = norm.fit(data[data.columns[_]])
+        
         std_dev_list.append(aux_list.std(axis=0))
+        
+        
         plt.figure(1)
-        aux_list.plot(kind='bar')
+        xmin, xmax = plt.xlim()
+        x = np.linspace(xmin, xmax, 200)
+        p = norm.pdf(x, mu, std)
+        plt.plot(x, p, 'k', linewidth=2)
+        title = "Fit results: mu = %.2f,  std = %.2f" % (mu, std)
+        plt.title(title)
+#        aux_list.plot(kind='bar')
         plt.show()
         
     
@@ -236,7 +252,7 @@ fig1 = plt.figure(figsize=(20,20))
 
 plt.subplot(4,3,1)
 
-b = all_pep1.corr()['Class'][:-1].sort_values()
+b = all_pep1.corr()['NHA'][:-1].sort_values()
 all_pep1.corr()['Class'][:-1].sort_values().plot(kind='bar',rot=0)
 plt.title("Correlation All Peptides")
 plt.savefig("Correlation_All_Peptides",  dpi=300)
@@ -251,35 +267,6 @@ plt.subplot(4,3,3)
 data_test2.corr()['Class'][:-1].sort_values().plot(kind='bar',rot=0)
 plt.title("Correlation Data Test II")
 plt.savefig("Correlation Data Test II",  dpi=300)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
